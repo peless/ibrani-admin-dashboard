@@ -1,6 +1,16 @@
 import { supabaseAdmin } from './supabase'
 
 export async function getDashboardMetrics() {
+  if (!supabaseAdmin) {
+    console.error('Supabase admin client not initialized')
+    return {
+      totalAssessments: 0,
+      todayAssessments: 0,
+      successRate: 0,
+      avgProcessingTime: 0
+    }
+  }
+  
   try {
     // Total assessments count
     const { count: totalAssessments, error: totalError } = await supabaseAdmin
@@ -61,6 +71,11 @@ export async function getDashboardMetrics() {
 }
 
 export async function getWeeklyTrends() {
+  if (!supabaseAdmin) {
+    console.error('Supabase admin client not initialized')
+    return []
+  }
+  
   try {
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)

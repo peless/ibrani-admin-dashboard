@@ -17,6 +17,11 @@ export class V3SessionService {
     table = 'v3_sessions';
 
     async createSession(data?: Partial<V3Session>): Promise<V3Session | null> {
+        if (!supabase) {
+            console.error('Supabase client not initialized')
+            return null
+        }
+        
         const defaults = {
             total_questions: 4,
             completed_questions: 0,
@@ -44,6 +49,11 @@ export class V3SessionService {
     }
 
     async getSessionById(session_id: string): Promise<V3Session | null> {
+        if (!supabase) {
+            console.error('Supabase client not initialized')
+            return null
+        }
+        
         const { data, error } = await supabase
             .from(this.table)
             .select('*')
@@ -62,6 +72,11 @@ export class V3SessionService {
         session_id: string,
         updates: Partial<V3Session>
     ): Promise<V3Session | null> {
+        if (!supabase) {
+            console.error('Supabase client not initialized')
+            return null
+        }
+        
         const { data, error } = await supabase
             .from(this.table)
             .update(updates)
@@ -78,6 +93,11 @@ export class V3SessionService {
     }
 
     async deleteSession(session_id: string): Promise<boolean> {
+        if (!supabase) {
+            console.error('Supabase client not initialized')
+            return false
+        }
+        
         const { error } = await supabase
             .from(this.table)
             .delete()

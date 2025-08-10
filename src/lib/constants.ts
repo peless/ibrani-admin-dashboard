@@ -79,8 +79,8 @@ export const parameterWeights = {
 // export const activeLanguage = !isProduction ? "en" : "ar"
 export const supportedLanguages=["en","he","ar"]
 export const defaultLanguage= "en"
-export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-export const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+export const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const disclaimerLink = "https://ibrani.ai/disclaimer"
 

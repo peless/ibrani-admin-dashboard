@@ -408,5 +408,5 @@ export class AppDbService {
 
 // Optionally, export a default instance if your application architecture favors it
 // import { supabase } from './supabaseClient'; // Make sure this path is correct
-const appDbService = new AppDbService(supabase);
+const appDbService = supabase ? new AppDbService(supabase) : null;
 export default appDbService;

@@ -2,6 +2,8 @@ import { getDashboardMetrics, getWeeklyTrends } from '@/lib/dashboard-queries'
 import MetricCard from '@/components/MetricCard'
 import { Users, CheckCircle, Clock, TrendingUp } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const metrics = await getDashboardMetrics()
   const weeklyTrends = await getWeeklyTrends()
