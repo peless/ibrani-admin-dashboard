@@ -39,7 +39,7 @@ export async function getDashboardMetrics() {
       ? processingTimes.reduce((sum, item) => sum + (item.total_processing_seconds || 0), 0) / processingTimes.length
       : 0
 
-    const successRate = totalAssessments > 0 
+    const successRate = totalAssessments && totalAssessments > 0 
       ? ((completedAssessments || 0) / totalAssessments * 100)
       : 0
 

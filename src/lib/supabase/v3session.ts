@@ -91,4 +91,5 @@ export class V3SessionService {
         return true;
     }
 }
-export default new V3SessionService();
+const v3SessionService = new V3SessionService();
+export default v3SessionService;

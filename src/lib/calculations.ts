@@ -1,8 +1,7 @@
-import { parameterWeights } from "@/constants";
-import { CefrLevelType } from "@/services/supabase/enums";
-import { SessionResult } from "@/services/supabase/types";
+import { parameterWeights } from "@/lib/constants";
+import { CefrLevelType } from "@/lib/supabase/enums";
+import { SessionResult } from "@/lib/supabase/types";
 import { Difficulty, LevelResult } from "@/types/levels";
-import { object } from "zod";
 
 export function getScoreCEFRLevel(score: number): CefrLevelType {
   if (score < 0 || score > 100) {
@@ -161,7 +160,11 @@ export const session_from_asssessment = (
   assessment: {
     [key in Difficulty]: Partial<LevelResult>;
   },
-  improvement_tip: any,
+  improvement_tip: {
+    en?: string;
+    ar?: string;
+    he?: string;
+  } | null,
   session_id: string
 ): SessionResult => {
   const ass = Object.entries(assessment);
@@ -172,23 +175,23 @@ export const session_from_asssessment = (
   }, {} as { [key in string]: string });
 
   const transcripts = ass
-    .map(([level, result]) => result?.result?.text)
+    .map(([, result]) => result?.result?.text)
     .filter((result) => result !== undefined);
 
   const audio_durations = ass
-    .map(([level, result]) => result?.result?.speaking_duration)
+    .map(([, result]) => result?.result?.speaking_duration)
     .filter((result) => result !== undefined);
   const word_counts = ass
-    .map(([level, result]) => result?.result?.total_words)
+    .map(([, result]) => result?.result?.total_words)
     .filter((result) => result !== undefined);
   const unique_words = ass
-    .map(([level, result]) => result?.result?.unique_words)
+    .map(([, result]) => result?.result?.unique_words)
     .filter((result) => result !== undefined);
   const pause_counts = ass
-    .map(([level, result]) => result?.result?.pause_count)
+    .map(([, result]) => result?.result?.pause_count)
     .filter((result) => result !== undefined);
   const language_detected = ass
-    .map(([level, result]) => result?.result?.language)
+    .map(([, result]) => result?.result?.language)
     .filter((result) => result !== undefined);
   const audio_links = ass.reduce((acc, [level, result]) => {
     acc[level] = result?.audio_file_path ?? "";
@@ -196,7 +199,7 @@ export const session_from_asssessment = (
   }, {} as { [key in string]: string });
 
   const grammar_morphology_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num =
         acc + (result?.evaluationResult?.grammar_morphology?.raw_score ?? 0);
       return num;
@@ -204,7 +207,7 @@ export const session_from_asssessment = (
   );
 
   const vocabulary_sophistication_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num =
         acc +
         (result?.evaluationResult?.vocabulary_sophistication?.raw_score ?? 0);
@@ -212,35 +215,35 @@ export const session_from_asssessment = (
     }, 0) / 4
   );
   const syntax_word_order_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num =
         acc + (result?.evaluationResult?.syntax_word_order?.raw_score ?? 0);
       return num;
     }, 0) / 4
   );
   const task_completion_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num =
         acc + (result?.evaluationResult?.task_completion?.raw_score ?? 0);
       return num;
     }, 0) / 4
   );
   const fluency_coherence_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num =
         acc + (result?.evaluationResult?.fluency_speaking_rate?.raw_score ?? 0);
       return num;
     }, 0) / 4
   );
   const pause_patterns_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num =
         acc + (result?.evaluationResult?.pause_patterns?.raw_score ?? 0);
       return num;
     }, 0) / 4
   );
   const final_score_raw_score = Math.round(
-    ass.reduce((acc, [level, result]) => {
+    ass.reduce((acc, [, result]) => {
       const num = acc + (result?.overall_score?.final_score ?? 0);
       return num;
     }, 0) / 4

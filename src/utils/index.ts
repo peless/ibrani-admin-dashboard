@@ -1,0 +1,1 @@
+export type { WeightedScores } from '@/lib/calculations';

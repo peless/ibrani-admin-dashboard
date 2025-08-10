@@ -1,5 +1,5 @@
 import { Difficulty } from "@/types/levels";
-import { AiParameterType } from "@/utils";
+import { AiParameterType } from "@/lib/calculations";
 export const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV == "production";
 export const API_URL =
   "https://hebrewspeakingevaluation--hebrew-asr-service-web-api.modal.run";

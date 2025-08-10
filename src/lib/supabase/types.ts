@@ -43,8 +43,8 @@ export interface AiDetection {
   model_used: string;
   model_version: string | null;
   prompt_version_hash: string;
-  detection_data: any; // jsonb
-  raw_api_response: any | null; // jsonb
+  detection_data: Record<string, unknown>; // jsonb
+  raw_api_response: Record<string, unknown> | null; // jsonb
   confidence_score: number | null; // numeric(4,3)
   processing_time_ms: number | null;
   token_usage: number | null;
@@ -68,10 +68,10 @@ export interface AssessmentResult {
   assessment_id: string; // uuid
   overall_raw_score: number; // numeric(5,2)
   overall_cefr_level: CefrLevelType;
-  parameter_weights: any; // jsonb
-  calculation_details: any; // jsonb
-  strengths_identified: any | null; // jsonb
-  improvement_priorities: any | null; // jsonb
+  parameter_weights: Record<string, number>; // jsonb
+  calculation_details: Record<string, unknown>; // jsonb
+  strengths_identified: Record<string, unknown> | null; // jsonb
+  improvement_priorities: Record<string, unknown> | null; // jsonb
   next_level_requirements: string | null;
   algorithm_version: string;
   scoring_completed_at: Date;
@@ -119,7 +119,7 @@ export interface ParameterScore {
   weight_percentage: number; // numeric(4,2)
   calculation_method: string;
   lookup_table_used: string | null;
-  input_values: any; // jsonb
+  input_values: Record<string, unknown>; // jsonb
   evidence_summary: string | null;
   algorithm_version: string;
   calculated_at: Date;
@@ -128,10 +128,10 @@ export interface ParameterScore {
 export interface ScoringAlgorithm {
   version: string;
   description: string;
-  parameter_weights: any; // jsonb
-  lookup_tables: any; // jsonb
-  cefr_thresholds: any; // jsonb
-  validation_results: any | null; // jsonb
+  parameter_weights: Record<string, number>; // jsonb
+  lookup_tables: Record<string, unknown>; // jsonb
+  cefr_thresholds: Record<string, number>; // jsonb
+  validation_results: Record<string, unknown> | null; // jsonb
   human_correlation_score: number | null; // numeric(4,3)
   created_by: string;
   active_from: Date;
@@ -174,7 +174,7 @@ export interface SystemError {
   error_message: string | null;
   component: string | null;
   severity: string | null;
-  request_data: any | null; // jsonb
+  request_data: Record<string, unknown> | null; // jsonb
   occurred_at: Date;
 }
 

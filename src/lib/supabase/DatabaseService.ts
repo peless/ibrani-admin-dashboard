@@ -11,14 +11,10 @@ import {
     ScoringAlgorithm,
     V3Session,
     UserQuestion,
-    SystemError, // Assuming you've created this table in Supabase
 } from './types';
 import {
     AssessmentStatus,
-    AiParameterType,
     ScoreParameterType,
-    ErrorCategoryType,
-    ErrorSeverity,
     CefrLevelType,
 } from './enums';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -108,7 +104,7 @@ export class AppDbService {
         return data as T[];
     }
 
-    private async getRecordsByColumn<T>(tableName: string, columnName: string, value: any): Promise<T[]> {
+    private async getRecordsByColumn<T>(tableName: string, columnName: string, value: string | number | boolean): Promise<T[]> {
         const { data, error } = await this.supabase
             .from(tableName)
             .select('*')
@@ -412,4 +408,5 @@ export class AppDbService {
 
 // Optionally, export a default instance if your application architecture favors it
 // import { supabase } from './supabaseClient'; // Make sure this path is correct
-export default new AppDbService(supabase);
+const appDbService = new AppDbService(supabase);
+export default appDbService;
