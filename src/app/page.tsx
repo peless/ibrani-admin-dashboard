@@ -5,8 +5,10 @@ import { Users, CheckCircle, Clock, TrendingUp } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+  console.log('DashboardPage rendering...')
   const metrics = await getDashboardMetrics()
   const weeklyTrends = await getWeeklyTrends()
+  console.log('Dashboard data:', { metrics, weeklyTrends })
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

@@ -1,8 +1,15 @@
 import { supabaseAdmin } from './supabase'
 
 export async function getDashboardMetrics() {
+  console.log('getDashboardMetrics called')
+  console.log('Environment variables:', {
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 20) + '...',
+    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  })
+  
   if (!supabaseAdmin) {
-    console.error('Supabase admin client not initialized')
+    console.error('Supabase admin client not initialized - environment variables missing')
     return {
       totalAssessments: 0,
       todayAssessments: 0,
@@ -12,20 +19,24 @@ export async function getDashboardMetrics() {
   }
   
   try {
+    console.log('Querying assessments table for total count...')
     // Total assessments count
     const { count: totalAssessments, error: totalError } = await supabaseAdmin
       .from('assessments')
       .select('*', { count: 'exact', head: true })
     
+    console.log('Total assessments query result:', { totalAssessments, totalError })
     if (totalError) throw totalError
 
     // Today's assessments
     const today = new Date().toISOString().split('T')[0]
+    console.log('Querying today\'s assessments for date:', today)
     const { count: todayAssessments, error: todayError } = await supabaseAdmin
       .from('assessments')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', today)
     
+    console.log('Today\'s assessments query result:', { todayAssessments, todayError })
     if (todayError) throw todayError
 
     // Success rate (completed vs total)
@@ -61,6 +72,7 @@ export async function getDashboardMetrics() {
     }
   } catch (error) {
     console.error('Dashboard metrics error:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return {
       totalAssessments: 0,
       todayAssessments: 0,
