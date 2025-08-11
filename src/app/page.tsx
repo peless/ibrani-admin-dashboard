@@ -1,6 +1,5 @@
-import { getDashboardMetrics, getWeeklyTrends, getCEFRDistribution, getLastSaturdayMorningDate } from '@/lib/dashboard-queries'
+import { getDashboardMetrics, getWeeklyTrends, getLastSaturdayMorningDate } from '@/lib/dashboard-queries'
 import MetricCard from '@/components/MetricCard'
-import CEFRChart from '@/components/CEFRChart'
 import { formatProcessingTime } from '@/utils/formatTime'
 import { Users, CheckCircle, Clock, TrendingUp, Timer, Calendar } from 'lucide-react'
 
@@ -8,12 +7,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   console.log('DashboardPage rendering...')
-  const [metrics, weeklyTrends, cefrData] = await Promise.all([
+  const [metrics, weeklyTrends] = await Promise.all([
     getDashboardMetrics(),
-    getWeeklyTrends(),
-    getCEFRDistribution()
+    getWeeklyTrends()
   ])
-  console.log('Dashboard data:', { metrics, weeklyTrends, cefrData })
+  console.log('Dashboard data:', { metrics, weeklyTrends })
 
   const lastSaturday = getLastSaturdayMorningDate()
 
@@ -69,13 +67,8 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* Analytics Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* CEFR Distribution */}
-          <CEFRChart data={cefrData} />
-          
-          {/* Weekly Trends */}
-          <div className="bg-white rounded-lg border p-6 shadow-sm">
+        {/* Weekly Trends */}
+        <div className="bg-white rounded-lg border p-6 shadow-sm mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Activity Since Last Saturday</h3>
           {weeklyTrends.length > 0 ? (
             <div className="space-y-2">
@@ -92,7 +85,6 @@ export default async function DashboardPage() {
           ) : (
             <p className="text-gray-500 text-sm">No data available for the past week</p>
           )}
-          </div>
         </div>
 
         {/* Status */}
