@@ -42,12 +42,12 @@ export default async function DashboardPage() {
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <MetricCard
-            title="Total Assessments"
+            title="Total User Sessions"
             value={metrics.totalAssessments.toLocaleString()}
             icon={<Users size={24} />}
           />
           <MetricCard
-            title="Today's Assessments"
+            title="Today's Sessions"
             value={metrics.todayAssessments}
             icon={<TrendingUp size={24} />}
           />

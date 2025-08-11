@@ -48,34 +48,41 @@ export async function getDashboardMetrics() {
     const lastSaturdayMorning = getLastSaturdayMorning()
     console.log('Filtering data from last Saturday morning:', lastSaturdayMorning)
     
-    // Total assessments count (from last Saturday morning)
-    const { count: totalAssessments, error: totalError } = await supabaseAdmin
+    // Total user sessions count (from last Saturday morning) - count unique session_ids
+    const { data: totalSessionsData, error: totalError } = await supabaseAdmin
       .from('assessments')
-      .select('*', { count: 'exact', head: true })
+      .select('session_id')
       .gte('created_at', lastSaturdayMorning)
     
-    console.log('Total assessments query result:', { totalAssessments, totalError })
+    const totalUserSessions = totalSessionsData ? [...new Set(totalSessionsData.map(a => a.session_id))].length : 0
+    console.log('Total user sessions query result:', { totalUserSessions, totalError })
     if (totalError) throw totalError
 
-    // Today's assessments
+    // Today's user sessions - count unique session_ids for today
     const today = new Date().toISOString().split('T')[0]
-    console.log('Querying today\'s assessments for date:', today)
-    const { count: todayAssessments, error: todayError } = await supabaseAdmin
+    console.log('Querying today\'s user sessions for date:', today)
+    const { data: todaySessionsData, error: todayError } = await supabaseAdmin
       .from('assessments')
-      .select('*', { count: 'exact', head: true })
+      .select('session_id')
       .gte('created_at', today)
     
-    console.log('Today\'s assessments query result:', { todayAssessments, todayError })
+    const todayUserSessions = todaySessionsData ? [...new Set(todaySessionsData.map(a => a.session_id))].length : 0
+    console.log('Today\'s user sessions query result:', { todayUserSessions, todayError })
     if (todayError) throw todayError
 
-    // Success rate (completed vs total) from last Saturday morning
-    const { count: completedAssessments, error: completedError } = await supabaseAdmin
+    // Success rate (completed sessions vs total sessions) from last Saturday morning
+    const { data: completedSessionsData, error: completedError } = await supabaseAdmin
       .from('assessments')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'completed')
+      .select('session_id, status')
       .gte('created_at', lastSaturdayMorning)
     
     if (completedError) throw completedError
+    
+    // Count unique sessions that have at least one completed assessment
+    const completedSessionIds = completedSessionsData
+      ?.filter(a => a.status === 'completed')
+      .map(a => a.session_id) || []
+    const completedUserSessions = [...new Set(completedSessionIds)].length
 
     // Processing times (from last Saturday morning, all data for accurate metrics)
     const { data: processingTimes, error: processingError } = await supabaseAdmin
@@ -91,13 +98,13 @@ export async function getDashboardMetrics() {
       ? processingTimes.reduce((sum, item) => sum + (item.total_processing_seconds || 0), 0) / processingTimes.length
       : 0
 
-    const successRate = totalAssessments && totalAssessments > 0 
-      ? ((completedAssessments || 0) / totalAssessments * 100)
+    const successRate = totalUserSessions && totalUserSessions > 0 
+      ? (completedUserSessions / totalUserSessions * 100)
       : 0
 
     return {
-      totalAssessments: totalAssessments || 0,
-      todayAssessments: todayAssessments || 0,
+      totalAssessments: totalUserSessions,
+      todayAssessments: todayUserSessions,
       successRate: Math.round(successRate * 10) / 10,
       avgProcessingTime: Math.round(avgProcessingTime * 10) / 10
     }
