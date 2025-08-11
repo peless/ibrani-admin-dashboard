@@ -10,8 +10,17 @@ export async function GET() {
       supabaseUrlPrefix: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 20) + '...'
     },
     supabaseAdmin: !!supabaseAdmin,
-    connectionTest: null as any,
-    tableTest: null as any
+    connectionTest: null as {
+      success: boolean;
+      error?: string;
+      hasData?: boolean;
+    } | null,
+    tableTest: null as {
+      success: boolean;
+      error?: string;
+      rowCount?: number;
+      sampleData?: Record<string, unknown>[];
+    } | null
   }
 
   if (supabaseAdmin) {
