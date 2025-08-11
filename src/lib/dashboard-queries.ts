@@ -41,7 +41,9 @@ export async function getDashboardMetrics() {
       todayAssessments: 0,
       successRate: 0,
       avgProcessingTime: 0,
-      medianProcessingTime: 0
+      medianProcessingTime: 0,
+      slowAssessments: 0,
+      failedAssessments: 0
     }
   }
   
@@ -109,12 +111,32 @@ export async function getDashboardMetrics() {
       ? ((completedAssessments || 0) / totalAssessments * 100)
       : 0
 
+    // Count slow assessments (>5 minutes = 300 seconds)
+    const { count: slowAssessments, error: slowError } = await supabaseAdmin
+      .from('assessments')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', lastSaturdayMorning)
+      .gt('total_processing_seconds', 300)
+    
+    if (slowError) console.error('Slow assessments query error:', slowError)
+
+    // Count failed/stuck assessments
+    const { count: failedAssessments, error: failedError } = await supabaseAdmin
+      .from('assessments')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', lastSaturdayMorning)
+      .in('status', ['failed', 'processing'])
+    
+    if (failedError) console.error('Failed assessments query error:', failedError)
+
     return {
       totalAssessments: totalAssessments || 0,
       todayAssessments: todayAssessments || 0,
-      successRate: Math.round(successRate * 10) / 10, // Round to 1 decimal
-      avgProcessingTime: Math.round(avgProcessingTime * 10) / 10, // Keep raw seconds for now
-      medianProcessingTime: Math.round(medianProcessingTime * 10) / 10
+      successRate: Math.round(successRate * 10) / 10,
+      avgProcessingTime: Math.round(avgProcessingTime * 10) / 10,
+      medianProcessingTime: Math.round(medianProcessingTime * 10) / 10,
+      slowAssessments: slowAssessments || 0,
+      failedAssessments: failedAssessments || 0
     }
   } catch (error) {
     console.error('Dashboard metrics error:', error)
@@ -124,7 +146,9 @@ export async function getDashboardMetrics() {
       todayAssessments: 0,
       successRate: 0,
       avgProcessingTime: 0,
-      medianProcessingTime: 0
+      medianProcessingTime: 0,
+      slowAssessments: 0,
+      failedAssessments: 0
     }
   }
 }
