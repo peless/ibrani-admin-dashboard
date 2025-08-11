@@ -23,7 +23,7 @@ export default async function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Ibrani Dashboard</h1>
-          <p className="text-gray-600">Hebrew Assessment Platform Analytics</p>
+          <p className="text-gray-600">Hebrew Assessment Platform Analytics (Updated)</p>
           
           {/* Date Range Indicator */}
           <div className="mt-3 flex items-center text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 w-fit">
