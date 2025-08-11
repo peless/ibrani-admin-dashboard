@@ -1,7 +1,7 @@
 import { getDashboardMetrics, getWeeklyTrends, getLastSaturdayMorningDate } from '@/lib/dashboard-queries'
 import MetricCard from '@/components/MetricCard'
 import { formatProcessingTime } from '@/utils/formatTime'
-import { Users, CheckCircle, Clock, TrendingUp, Timer, Calendar, AlertTriangle, XCircle } from 'lucide-react'
+import { Users, CheckCircle, Clock, TrendingUp, Timer, Calendar } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <MetricCard
             title="Total Assessments"
             value={metrics.totalAssessments.toLocaleString()}
@@ -64,16 +64,6 @@ export default async function DashboardPage() {
             title="Median Processing Time"
             value={formatProcessingTime(metrics.medianProcessingTime)}
             icon={<Timer size={24} />}
-          />
-          <MetricCard
-            title="Slow Assessments"
-            value={metrics.slowAssessments}
-            icon={<AlertTriangle size={24} />}
-          />
-          <MetricCard
-            title="Failed/Stuck"
-            value={metrics.failedAssessments}
-            icon={<XCircle size={24} />}
           />
         </div>
 
