@@ -14,6 +14,7 @@ export default async function DashboardPage() {
   console.log('Dashboard data:', { metrics, weeklyTrends })
 
   const lastSaturday = getLastSaturdayMorningDate()
+  const lastUpdated = new Date()
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -82,11 +83,16 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Status */}
-        <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800">
-            <CheckCircle className="inline w-5 h-5 mr-2" />
-            System Status: All services operational
+        {/* Last Updated */}
+        <div className="mt-8 flex justify-end">
+          <p className="text-sm text-gray-500">
+            Dashboard last updated: {lastUpdated.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric', 
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            })}
           </p>
         </div>
       </div>
