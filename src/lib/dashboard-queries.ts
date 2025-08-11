@@ -1,5 +1,18 @@
 import { supabaseAdmin } from './supabase'
 
+// Get last Saturday morning (start of week for dashboard data)
+function getLastSaturdayMorning(): string {
+  const now = new Date()
+  const dayOfWeek = now.getDay() // 0=Sunday, 1=Monday, ..., 6=Saturday
+  const daysToSubtract = dayOfWeek === 6 ? 0 : (dayOfWeek + 1) // If today is Saturday, use today; otherwise go back to last Saturday
+  
+  const lastSaturday = new Date(now)
+  lastSaturday.setDate(now.getDate() - daysToSubtract)
+  lastSaturday.setHours(8, 0, 0, 0) // 8 AM Saturday morning
+  
+  return lastSaturday.toISOString()
+}
+
 export async function getDashboardMetrics() {
   console.log('getDashboardMetrics called')
   console.log('Environment variables:', {
@@ -14,16 +27,20 @@ export async function getDashboardMetrics() {
       totalAssessments: 0,
       todayAssessments: 0,
       successRate: 0,
-      avgProcessingTime: 0
+      avgProcessingTime: 0,
+      medianProcessingTime: 0
     }
   }
   
   try {
-    console.log('Querying assessments table for total count...')
-    // Total assessments count
+    const lastSaturdayMorning = getLastSaturdayMorning()
+    console.log('Filtering data from last Saturday morning:', lastSaturdayMorning)
+    
+    // Total assessments count (from last Saturday morning)
     const { count: totalAssessments, error: totalError } = await supabaseAdmin
       .from('assessments')
       .select('*', { count: 'exact', head: true })
+      .gte('created_at', lastSaturdayMorning)
     
     console.log('Total assessments query result:', { totalAssessments, totalError })
     if (totalError) throw totalError
@@ -39,26 +56,41 @@ export async function getDashboardMetrics() {
     console.log('Today\'s assessments query result:', { todayAssessments, todayError })
     if (todayError) throw todayError
 
-    // Success rate (completed vs total)
+    // Success rate (completed vs total) from last Saturday morning
     const { count: completedAssessments, error: completedError } = await supabaseAdmin
       .from('assessments')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
+      .gte('created_at', lastSaturdayMorning)
     
     if (completedError) throw completedError
 
-    // Average processing time
+    // Processing times (from last Saturday morning, all data for accurate metrics)
     const { data: processingTimes, error: processingError } = await supabaseAdmin
       .from('assessments')
       .select('total_processing_seconds')
       .not('total_processing_seconds', 'is', null)
-      .limit(100)
+      .gte('created_at', lastSaturdayMorning)
     
     if (processingError) throw processingError
 
+    // Calculate average processing time
     const avgProcessingTime = processingTimes.length > 0 
       ? processingTimes.reduce((sum, item) => sum + (item.total_processing_seconds || 0), 0) / processingTimes.length
       : 0
+
+    // Calculate median processing time
+    let medianProcessingTime = 0
+    if (processingTimes.length > 0) {
+      const sortedTimes = processingTimes
+        .map(item => item.total_processing_seconds || 0)
+        .sort((a, b) => a - b)
+      
+      const mid = Math.floor(sortedTimes.length / 2)
+      medianProcessingTime = sortedTimes.length % 2 === 0
+        ? (sortedTimes[mid - 1] + sortedTimes[mid]) / 2
+        : sortedTimes[mid]
+    }
 
     const successRate = totalAssessments && totalAssessments > 0 
       ? ((completedAssessments || 0) / totalAssessments * 100)
@@ -68,7 +100,8 @@ export async function getDashboardMetrics() {
       totalAssessments: totalAssessments || 0,
       todayAssessments: todayAssessments || 0,
       successRate: Math.round(successRate * 10) / 10, // Round to 1 decimal
-      avgProcessingTime: Math.round(avgProcessingTime * 10) / 10 // Round to 1 decimal
+      avgProcessingTime: Math.round(avgProcessingTime * 10) / 10, // Keep raw seconds for now
+      medianProcessingTime: Math.round(medianProcessingTime * 10) / 10
     }
   } catch (error) {
     console.error('Dashboard metrics error:', error)
@@ -77,7 +110,8 @@ export async function getDashboardMetrics() {
       totalAssessments: 0,
       todayAssessments: 0,
       successRate: 0,
-      avgProcessingTime: 0
+      avgProcessingTime: 0,
+      medianProcessingTime: 0
     }
   }
 }
