@@ -1,15 +1,21 @@
-import { getDashboardMetrics, getWeeklyTrends } from '@/lib/dashboard-queries'
+import { getDashboardMetrics, getWeeklyTrends, getCEFRDistribution, getLastSaturdayMorningDate } from '@/lib/dashboard-queries'
 import MetricCard from '@/components/MetricCard'
+import CEFRChart from '@/components/CEFRChart'
 import { formatProcessingTime } from '@/utils/formatTime'
-import { Users, CheckCircle, Clock, TrendingUp, Timer } from 'lucide-react'
+import { Users, CheckCircle, Clock, TrendingUp, Timer, Calendar } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   console.log('DashboardPage rendering...')
-  const metrics = await getDashboardMetrics()
-  const weeklyTrends = await getWeeklyTrends()
-  console.log('Dashboard data:', { metrics, weeklyTrends })
+  const [metrics, weeklyTrends, cefrData] = await Promise.all([
+    getDashboardMetrics(),
+    getWeeklyTrends(),
+    getCEFRDistribution()
+  ])
+  console.log('Dashboard data:', { metrics, weeklyTrends, cefrData })
+
+  const lastSaturday = getLastSaturdayMorningDate()
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -18,6 +24,20 @@ export default async function DashboardPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Ibrani Dashboard</h1>
           <p className="text-gray-600">Hebrew Assessment Platform Analytics</p>
+          
+          {/* Date Range Indicator */}
+          <div className="mt-3 flex items-center text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 w-fit">
+            <Calendar className="w-4 h-4 mr-2" />
+            <span>
+              Data from {lastSaturday.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })} onwards (rolling weekly view)
+            </span>
+          </div>
         </div>
 
         {/* Metrics Grid */}
@@ -49,9 +69,14 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* Weekly Trends */}
-        <div className="bg-white rounded-lg border p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Weekly Activity</h2>
+        {/* Analytics Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* CEFR Distribution */}
+          <CEFRChart data={cefrData} />
+          
+          {/* Weekly Trends */}
+          <div className="bg-white rounded-lg border p-6 shadow-sm">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Activity Since Last Saturday</h3>
           {weeklyTrends.length > 0 ? (
             <div className="space-y-2">
               {weeklyTrends.map((day, index) => (
@@ -65,8 +90,9 @@ export default async function DashboardPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No data available for the past week</p>
+            <p className="text-gray-500 text-sm">No data available for the past week</p>
           )}
+          </div>
         </div>
 
         {/* Status */}

@@ -13,6 +13,19 @@ function getLastSaturdayMorning(): string {
   return lastSaturday.toISOString()
 }
 
+// Get last Saturday morning as Date object for display
+export function getLastSaturdayMorningDate(): Date {
+  const now = new Date()
+  const dayOfWeek = now.getDay()
+  const daysToSubtract = dayOfWeek === 6 ? 0 : (dayOfWeek + 1)
+  
+  const lastSaturday = new Date(now)
+  lastSaturday.setDate(now.getDate() - daysToSubtract)
+  lastSaturday.setHours(8, 0, 0, 0)
+  
+  return lastSaturday
+}
+
 export async function getDashboardMetrics() {
   console.log('getDashboardMetrics called')
   console.log('Environment variables:', {
@@ -116,6 +129,48 @@ export async function getDashboardMetrics() {
   }
 }
 
+// Get CEFR level distribution for proficiency insights
+export async function getCEFRDistribution() {
+  if (!supabaseAdmin) {
+    console.error('Supabase admin client not initialized')
+    return []
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('assessment_results')
+      .select('overall_cefr_level')
+      .not('overall_cefr_level', 'is', null)
+    
+    if (error) throw error
+
+    // Count by main CEFR level (A1, A2, B1, B2, C1, C2)
+    const levelCounts: Record<string, number> = {}
+    const levelOrder = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+    
+    data?.forEach(result => {
+      const level = result.overall_cefr_level
+      if (level) {
+        // Extract main level from detailed level (A1.1 → A1)
+        const mainLevel = level.split('.')[0]
+        levelCounts[mainLevel] = (levelCounts[mainLevel] || 0) + 1
+      }
+    })
+
+    const total = data?.length || 0
+    
+    // Return clean data structure
+    return levelOrder.map(level => ({
+      level,
+      count: levelCounts[level] || 0,
+      percentage: total > 0 ? Math.round(((levelCounts[level] || 0) / total) * 100) : 0
+    })).filter(item => item.count > 0) // Only show levels with data
+  } catch (error) {
+    console.error('CEFR distribution error:', error)
+    return []
+  }
+}
+
 export async function getWeeklyTrends() {
   if (!supabaseAdmin) {
     console.error('Supabase admin client not initialized')
@@ -123,13 +178,12 @@ export async function getWeeklyTrends() {
   }
   
   try {
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const lastSaturdayMorning = getLastSaturdayMorning()
     
     const { data, error } = await supabaseAdmin
       .from('assessments')
       .select('created_at, status')
-      .gte('created_at', sevenDaysAgo.toISOString())
+      .gte('created_at', lastSaturdayMorning)
       .order('created_at', { ascending: true })
     
     if (error) throw error
