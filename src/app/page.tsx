@@ -65,7 +65,7 @@ export default async function DashboardPage() {
 
         {/* Weekly Trends */}
         <div className="bg-white rounded-lg border p-6 shadow-sm mb-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Activity Since Last Saturday</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Activity by Days</h3>
           {weeklyTrends.length > 0 ? (
             <div className="space-y-2">
               {weeklyTrends.map((day, index) => (
