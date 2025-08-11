@@ -72,7 +72,7 @@ export default async function DashboardPage() {
                 <div key={index} className="flex justify-between items-center py-2 border-b last:border-b-0">
                   <span className="text-sm text-gray-600">{new Date(day.date).toLocaleDateString()}</span>
                   <div className="flex space-x-4 text-sm">
-                    <span className="text-blue-600">{day.assessments} total</span>
+                    <span className="text-blue-600">{day.sessions} total</span>
                     <span className="text-green-600">{day.completed} completed</span>
                   </div>
                 </div>

@@ -132,27 +132,48 @@ export async function getWeeklyTrends() {
     
     const { data, error } = await supabaseAdmin
       .from('assessments')
-      .select('created_at, status')
+      .select('created_at, status, session_id')
       .gte('created_at', lastSaturdayMorning)
       .order('created_at', { ascending: true })
     
     if (error) throw error
 
-    // Group by day
-    const dailyData: Record<string, { date: string; assessments: number; completed: number }> = {}
+    // Group by day, counting unique sessions
+    const dailyData: Record<string, { 
+      date: string; 
+      sessionIds: Set<string>; 
+      completedSessionIds: Set<string>;
+      sessions: number; 
+      completed: number 
+    }> = {}
     
     data?.forEach(assessment => {
       const date = assessment.created_at.split('T')[0]
       if (!dailyData[date]) {
-        dailyData[date] = { date, assessments: 0, completed: 0 }
+        dailyData[date] = { 
+          date, 
+          sessionIds: new Set(), 
+          completedSessionIds: new Set(),
+          sessions: 0, 
+          completed: 0 
+        }
       }
-      dailyData[date].assessments++
+      
+      // Add session to daily count
+      dailyData[date].sessionIds.add(assessment.session_id)
+      
+      // If this assessment is completed, mark the session as having completed work
       if (assessment.status === 'completed') {
-        dailyData[date].completed++
+        dailyData[date].completedSessionIds.add(assessment.session_id)
       }
     })
     
-    return Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date))
+    // Convert Sets to counts and return clean data
+    return Object.values(dailyData).map(day => ({
+      date: day.date,
+      sessions: day.sessionIds.size,
+      completed: day.completedSessionIds.size
+    })).sort((a, b) => a.date.localeCompare(b.date))
   } catch (error) {
     console.error('Weekly trends error:', error)
     return []
