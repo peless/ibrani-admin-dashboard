@@ -40,8 +40,7 @@ export async function getDashboardMetrics() {
       totalAssessments: 0,
       todayAssessments: 0,
       successRate: 0,
-      avgProcessingTime: 0,
-      medianProcessingTime: 0
+      avgProcessingTime: 0
     }
   }
   
@@ -92,19 +91,6 @@ export async function getDashboardMetrics() {
       ? processingTimes.reduce((sum, item) => sum + (item.total_processing_seconds || 0), 0) / processingTimes.length
       : 0
 
-    // Calculate median processing time
-    let medianProcessingTime = 0
-    if (processingTimes.length > 0) {
-      const sortedTimes = processingTimes
-        .map(item => item.total_processing_seconds || 0)
-        .sort((a, b) => a - b)
-      
-      const mid = Math.floor(sortedTimes.length / 2)
-      medianProcessingTime = sortedTimes.length % 2 === 0
-        ? (sortedTimes[mid - 1] + sortedTimes[mid]) / 2
-        : sortedTimes[mid]
-    }
-
     const successRate = totalAssessments && totalAssessments > 0 
       ? ((completedAssessments || 0) / totalAssessments * 100)
       : 0
@@ -113,8 +99,7 @@ export async function getDashboardMetrics() {
       totalAssessments: totalAssessments || 0,
       todayAssessments: todayAssessments || 0,
       successRate: Math.round(successRate * 10) / 10,
-      avgProcessingTime: Math.round(avgProcessingTime * 10) / 10,
-      medianProcessingTime: Math.round(medianProcessingTime * 10) / 10
+      avgProcessingTime: Math.round(avgProcessingTime * 10) / 10
     }
   } catch (error) {
     console.error('Dashboard metrics error:', error)
@@ -123,8 +108,7 @@ export async function getDashboardMetrics() {
       totalAssessments: 0,
       todayAssessments: 0,
       successRate: 0,
-      avgProcessingTime: 0,
-      medianProcessingTime: 0
+      avgProcessingTime: 0
     }
   }
 }
